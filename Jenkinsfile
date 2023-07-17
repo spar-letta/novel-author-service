@@ -10,13 +10,15 @@ pipeline {
             steps {
                 sh "mvn test"
             }
-	  post {
-	        always {
-		        junit "**/target/Test-reports/report.xml"
-	        }
+        }
+        stage("Build docker image"){
+            steps{
+                script{
+                    sh "docker build -t javenockdocker/author-service.1.0 ."
+                }
+            }
+        }
 
-        }
-        }
         stage('Deploy') {
             steps {
                 sh "mvn package"
