@@ -24,7 +24,16 @@ pipeline {
                 }
             }
         }
-
+         stage("Push image to Dockerhub"){
+                    steps{
+                        script{
+                            withCredentials([string(credentialsId: 'javenockdocker', variable: 'javenockdockerpwd')]) {
+                                sh "docker login -u javenockdocker -p ${javenockdockerpwd}"
+                            }
+                            sh "docker push javenockdocker/author-service.1.0"
+                        }
+                    }
+                }
         stage('Deploy') {
             steps {
                 sh "mvn package"
