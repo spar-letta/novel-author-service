@@ -10,9 +10,8 @@ import com.javenock.authorservice.response.AuthorResponse;
 import com.javenock.authorservice.response.BookResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -22,7 +21,8 @@ public class AuthorService {
     private AuthorRepository authorRepository;
 
     @Autowired
-    private WebClient.Builder webClient;
+    private RestTemplate restTemplate;
+//    private WebClient.Builder webClient;
 
     public Author createNewAuthor(AuthorRequest authorRequest) {
         Author author = Author.builder()
@@ -43,12 +43,15 @@ public class AuthorService {
 
     public AuthorBookResponse getAuthorById(Long authorid) throws NoSuchAuthorException {
         Author author = authorRepository.findById(authorid).orElseThrow(() -> new NoSuchAuthorException("No such author with id :"+ authorid));
-        BookResponse[] bkResponse = webClient.build().get()
-                        .uri("http://BOOKS-SERVICE/book/author_id/"+authorid)
-                                .retrieve()
-                                        .bodyToMono(BookResponse[].class)
-                                                .block();
-        List<BookResponse> arr = Arrays.asList(bkResponse);
+
+        List<BookResponse> arr = restTemplate.getForObject("http://book-service-app/book/author_id/{authorid}", List.class, authorid);
+
+//        BookResponse[] bkResponse = webClient.build().get()
+//                        .uri("http://BOOKS-SERVICE/book/author_id/"+authorid)
+//                                .retrieve()
+//                                        .bodyToMono(BookResponse[].class)
+//                                                .block();
+//        List<BookResponse> arr = Arrays.asList(bkResponse);
         AuthorBookResponse authorBookResponse = new AuthorBookResponse(new AuthorResponse(author.getAuthor_name(), author.getNationality()), arr);
         return authorBookResponse;
     }
